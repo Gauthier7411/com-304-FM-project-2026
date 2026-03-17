@@ -56,14 +56,20 @@ class MaskGIT(nn.Module):
         self.seq_read_key = seq_read_key
         self.init_std = init_std
 
-        self.input_embedding = ??? # TODO: Define the input embedding layer
-        self.positional_embedding = ??? # TODO: Define the learnable positional embedding
-        self.mask_token = ??? # TODO: Define the learnable mask token
-        
-        self.trunk = ??? # TODO: Define the transformer trunk
+        self.input_embedding = nn.Embedding(vocab_size, dim) # TODO: Define the input embedding layer
+        self.positional_embedding = nn.Parameter(torch.randn(seq_len, dim) * init_std) # TODO: Define the learnable positional embedding
+        self.mask_token = nn.Parameter(torch.randn(dim) * init_std) # TODO: Define the learnable mask token
 
-        self.out_norm = ??? # TODO: Define the output layer normalization. Use the LayerNorm class defined in modeling/transformer_layers.py
-        self.to_logits = ??? # TODO: Define the output projection layer
+        self.trunk = TransformerTrunk(
+            dim=dim,
+            depth=depth,
+            head_dim=head_dim,
+            mlp_ratio=mlp_ratio,
+            use_bias=use_bias
+        ) # TODO: Define the transformer trunk
+
+        self.out_norm = LayerNorm(dim) # TODO: Define the output layer normalization. Use the LayerNorm class defined in modeling/transformer_layers.py
+        self.to_logits = nn.Linear(dim, vocab_size, bias=False) # TODO: Define the output projection layer
 
         self.initialize_weights() # Weight initialization
 
@@ -117,24 +123,25 @@ class MaskGIT(nn.Module):
         B, L = x.size() # batch size and sequence length
 
         # TODO: Embed the input tokens using the input embedding layer. Shape: [B, L, D]
-        ???
+        x = self.input_embedding(x)
 
         # TODO: Replace embeddings for masked tokens with the learned self.mask_token, wherever mask is True.
         # The mask token (D) is broadcast to all masked positions (B, L)
-        ???
+        x = torch.where(mask.unsqueeze(-1), self.mask_token.view(1, 1, -1), x)
 
         # TODO: Add the positional embeddings to the tokens
-        ???
+        x = x + self.positional_embedding[:L].unsqueeze(0)
 
         # TODO: Forward pass through Transformer trunk
         # Hint: No causal mask is needed here, since we are using full self-attention.
-        ???
+        x = self.trunk(x)
 
         # TODO: Pass to the output normalization and output projection layer to compute the logits
-        ???
+        x = self.out_norm(x)
+        x = self.to_logits(x)
 
         # TODO: Return the logits
-        return ???
+        return x
 
     def generate_random_mask(self, seq: torch.Tensor) -> torch.BoolTensor:
         """
@@ -172,7 +179,9 @@ class MaskGIT(nn.Module):
         """
         # TODO: Compute and return the cross-entropy loss
         # Hint: Remember to ignore the ignore_index in the loss calculation
-        ???
+        loss_fct = nn.CrossEntropyLoss(ignore_index=ignore_index)
+        loss = loss_fct(logits.view(-1, logits.size(-1)), target_seq.view(-1))
+        return loss
 
     def forward(self, data_dict: Dict[str, Any]) -> Tuple[torch.Tensor, Dict[str, Any]]:
         """
