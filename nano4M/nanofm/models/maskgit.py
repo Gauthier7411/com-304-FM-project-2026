@@ -155,6 +155,7 @@ class MaskGIT(nn.Module):
             A boolean tensor of shape (B, L) where True indicates a masked token.
         """
         B, L = seq.size()
+        device = seq.device
 
         # TODO: Generate and return a random mask of shape (B, L), where
         # True = masked-out, False = not masked. Each sample should have a
@@ -164,7 +165,24 @@ class MaskGIT(nn.Module):
         # Note: How can you avoid using a for loop here, and instead use
         # vectorized operations?
         # Hint: Don't forget to create the mask on the same device as seq.
-        ???
+        # Number of masked tokens per sample, sampled uniformly in {1, ..., L}
+        num_masked = torch.randint(1, L + 1, (B,), device=device)
+
+        # Random scores for each position
+        rand = torch.rand(B, L, device=device)
+
+        # Sort positions by random score for each sample
+        perm = rand.argsort(dim=1)
+
+        # Create mask in permuted order:
+        # first num_masked positions are True, the rest False
+        mask_in_perm_order = torch.arange(L, device=device).unsqueeze(0) < num_masked.unsqueeze(1)
+
+        # Scatter back to original token positions
+        mask = torch.zeros(B, L, dtype=torch.bool, device=device)
+        mask.scatter_(1, perm, mask_in_perm_order)
+
+        return mask
 
     def compute_ce_loss(self, logits: torch.Tensor, target_seq: torch.LongTensor, ignore_index: int = -100) -> torch.Tensor:
         """
@@ -239,7 +257,10 @@ class MaskGIT(nn.Module):
         # The `schedule` should be a list of integers of length `num_steps`, where each integer
         # represents the number of tokens to unmask at that step. The sum of the integers in
         # `schedule` should equal `total_tokens`.
-        ???
+        base = total_tokens // num_steps
+        remainder = total_tokens % num_steps
+        schedule = [base] * num_steps
+        schedule[-1] += remainder
 
         assert len(schedule) == num_steps, "Schedule length should match the number of steps."
         assert sum(schedule) == total_tokens, "Total number of tokens to unmask should match the sum of the schedule."
@@ -292,39 +313,39 @@ class MaskGIT(nn.Module):
 
         for step, k in enumerate(schedule):
             # TODO: Forward pass through the model to get the logits. Shape: [1, L, vocab_size]
-            logits = ???
+            logits = self.forward_model(seq, mask)
             
             # TODO: Get the indices of masked tokens. Shape: [M,] (M = number of masked tokens)
-            masked_indices = ???
+            masked_indices = torch.where(mask[0])[0]
 
             # TODO: Get the logits for the `masked_indices` positions. Shape: [M, vocab_size]
-            masked_logits = ???
+            masked_logits = logits[0, masked_indices, :]
             
             # TODO: Compute confidence scores from `masked_logits`. Shape: [M,]
             # Hint: As a proxy for confidence, we use the maximum logit value for each masked position.
-            confidence = ???
+            confidence = masked_logits.max(dim=-1).values
             
             # TODO: Based on the number of tokens `k` to unmask at this step in the schedule,
             # select the top-k masked positions based on confidence. Shape: [k,]
             # Hint: First, get the top-k indices of the confidence scores, and then use these indices
             # to select the corresponding masked positions.
-            ???
-            selected_positions = ???
+            top_k_indices = torch.topk(confidence, k=k, dim=0).indices
+            selected_positions = masked_indices[top_k_indices]
             
             # TODO: Get the logits for the `selected_positions`. Shape: [k, vocab_size]
-            selected_logits = ???
+            selected_logits = logits[0, selected_positions, :]
             
             # TODO: Sample new tokens for the selected_positions
             # Hint: Use the sample_tokens function from utils/sampling.py
             # Make sure to pass the `temp`, `top_k` and `top_p` arguments
-            samples, _ = ???
+            samples, _ = sample_tokens(selected_logits, temp=temp, top_k=top_k, top_p=top_p)
             
             # TODO: Update the sequence and mask. 
             # Replace the selected positions in `seq` with the sampled tokens
             # and set the corresponding positions in `mask` to False (indicating that
             # these positions are no longer masked).
-            ???
-            ???
+            seq[0, selected_positions] = samples
+            mask[0, selected_positions] = False
 
             if return_history:
                 seq_history.append(seq.clone().cpu())
