@@ -338,7 +338,7 @@ class MaskGIT(nn.Module):
             # TODO: Sample new tokens for the selected_positions
             # Hint: Use the sample_tokens function from utils/sampling.py
             # Make sure to pass the `temp`, `top_k` and `top_p` arguments
-            samples, _ = sample_tokens(selected_logits, temp=temp, top_k=top_k, top_p=top_p)
+            samples, _ = sample_tokens(selected_logits, temperature=temp, top_k=top_k, top_p=top_p)
             
             # TODO: Update the sequence and mask. 
             # Replace the selected positions in `seq` with the sampled tokens
