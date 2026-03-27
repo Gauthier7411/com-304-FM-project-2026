@@ -65,7 +65,7 @@ See the [nano4M notebook](./nano4M/notebooks/COM304_FM_part3_nano4M.ipynb) for t
 ### 7. Advanced Homework 6: nanoFlowMatching [Worth 10% of your overall grade]
 In this advanced homework, you will implement a minimal **[Flow Matching](https://arxiv.org/abs/2210.02747)** model. The exercise covers **continuous normalizing flows**, **vector field regression**, and how flow-based generative models can be used for high-quality image generation.
 
-Check out the [nanoFlowMatching notebook (coming soon)](TODO) for the full set of exercises and instructions.
+Check out the [nanoFlowMatching notebook](./nano4M/notebooks/COM304_FM_part4_nanoFlowMatching.ipynb) for the full set of exercises and instructions.
 
 ### 8. Advanced Homework 7: nanoVLM [Worth 10% of your overall grade]
 In this advanced homework, you will implement a minimal **[Vision-Language Models (VLMs)](https://llava-vl.github.io)**. You will learn how to combine **visual encoders** with **language models**, enabling multimodal understanding and reasoning across vision and language tasks.
