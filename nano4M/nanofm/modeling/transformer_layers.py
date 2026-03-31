@@ -218,16 +218,16 @@ class DecoderBlock(nn.Module):
     """
     def __init__(self, dim: int, head_dim: int = 64, mlp_ratio: float = 4., use_bias: bool = False):
         super().__init__()
-        self.norm1 = LayerNorm(dim)          # TODO (use the LayerNorm defined above)
-        self.query_norm = LayerNorm(dim)     # TODO (use the LayerNorm defined above)
-        self.context_norm = LayerNorm(dim)   # TODO (use the LayerNorm defined above)
-        self.norm2 = LayerNorm(dim)          # TODO (use the LayerNorm defined above)
+        self.norm1 = LayerNorm(dim)
+        self.query_norm = LayerNorm(dim)
+        self.context_norm = LayerNorm(dim)
+        self.norm2 = LayerNorm(dim)
 
-        self.self_attn = Attention(dim, head_dim, use_bias, use_bias)          # TODO Attention layer
-        self.cross_attn = CrossAttention(dim, head_dim, use_bias, use_bias)    # TODO CrossAttention layer
+        self.self_attn = Attention(dim, head_dim, use_bias, use_bias)
+        self.cross_attn = CrossAttention(dim, head_dim, use_bias, use_bias)
 
         mlp_hidden_dim = int(dim * mlp_ratio)
-        self.mlp = Mlp(dim, mlp_hidden_dim, bias=use_bias)   # TODO MLP layer
+        self.mlp = Mlp(dim, mlp_hidden_dim, bias=use_bias)
 
     def forward(self, 
             x: torch.Tensor, 
