@@ -124,10 +124,10 @@ class FourM(nn.Module):
         self.decoder = TransformerDecoderTrunk(dim, dec_depth, head_dim, mlp_ratio, use_bias)
 
         # Initialize encoder -> decoder context projection
-        self.dec_context_proj = nn.Linear(dim, dim, bias=use_bias)
+        self.dec_context_proj = nn.Linear(dim, dim, bias=use_bias) # Define the encoder -> decoder projection. This is simply a linear layer mapping dim -> dim
 
         # Initialize decoder output projection
-        self.to_logits = nn.Linear(dim, self.vocab_size, bias=False)
+        self.to_logits = nn.Linear(dim, self.vocab_size, bias=False) 
 
         # Initialize norm layers
         self.enc_norm = LayerNorm(dim)
