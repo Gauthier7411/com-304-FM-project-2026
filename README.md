@@ -70,7 +70,7 @@ Check out the [nanoFlowMatching notebook](./nano4M/notebooks/COM304_FM_part4_nan
 ### 8. Advanced Homework 7: nanoVLM [Worth 10% of your overall grade]
 In this advanced homework, you will implement a minimal **[Vision-Language Models (VLMs)](https://llava-vl.github.io)**. You will learn how to combine **visual encoders** with **language models**, enabling multimodal understanding and reasoning across vision and language tasks.
 
-You can find the exercises and detailed instructions in the [nanoVLM notebook (coming soon)](TODO).
+You can find the exercises and detailed instructions in the [nanoVLM notebook](nanoVLM/COM304_FM_part5_nanoVLM.ipynb).
 
 ## Project Guidelines
 You can find more details and the project guidelines in the [project guidelines PDF](COM_304_Spring_2026_nano4M_Project_Guidelines.pdf) file.
