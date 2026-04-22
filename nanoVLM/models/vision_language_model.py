@@ -67,44 +67,59 @@ class VisionLanguageModel(nn.Module):
 
     def forward(self, input_ids, image, attention_mask=None, targets=None):
 
-        # TODO
         # Step 1: Compute image embeddings
         # Process image through vision backbone and vision modality projector
-        image_embeds = ...
+        image_embeds = self.MP(self.vision_encoder(image))
 
 
         # Step 2: Compute text embeddings
         # Get text embeddings using the token_embedding layer of self.decoder
-        text_embeds = ...
+        text_embeds = self.decoder.token_embedding(input_ids)
 
 
         # Step 3: Concatenate image and text embeddings
-        combined_embeds = ...
+        combined_embeds = torch.cat((image_embeds, text_embeds), dim=1)
 
 
         # Step 4: Extend the attention mask
         # The current attention_mask only covers text tokens (B, T)
         # Note: image tokens should always be attended to
         if attention_mask is not None:
-            image_attention = ... # define attention mask for image
-            attention_mask = ...  # combined attention mask
+            image_attention = torch.ones(
+                (image_embeds.size(0), image_embeds.size(1)),
+                device=attention_mask.device,
+                dtype=attention_mask.dtype,
+            )
+            attention_mask = torch.cat((image_attention, attention_mask), dim=1)
 
         # Step 5: LLM forward pass
         # Pass combined embeddings and attention mask to the LLM decoder to get the final token embeddings
-        output_token_embeddings = ...
+        output_token_embeddings = self.decoder(combined_embeds, attention_mask=attention_mask)
+
+        if self.decoder.lm_use_tokens:
+            logits = output_token_embeddings
+        else:
+            logits = self.decoder.head(output_token_embeddings)
 
         loss = None
         # Step 6, 7 & 8: Compute Loss (only if targets are provided)
         if targets is not None:
             # Step 6: Project the embeddings to vocabulary distribution via decoder head (self.decoder.head)
-            logits = ...
+            logits = logits
 
             # Step 7: Obtain the text part of logits (ignore image tokens)
-            logits = ...
+            logits = logits[:, image_embeds.size(1):, :]
 
             # Step 8: Compute Cross-Entropy loss on answer tokens only
             # Hint: use ignore_index to mask out non-answer tokens
-            loss = ...
+            loss = F.cross_entropy(
+                logits.reshape(-1, logits.size(-1)),
+                targets.reshape(-1),
+                ignore_index=-100,
+            )
+
+        else:
+            logits = logits[:, image_embeds.size(1):, :]
 
         return logits, loss
 
@@ -159,7 +174,7 @@ class VisionLanguageModel(nn.Module):
 
         for i in range(...):
 
-            model_out = ....  # (i)
+            model_out = ...  # (i)
 
 
             last_token_logits = ... # (ii)
@@ -343,5 +358,3 @@ class VisionLanguageModel(nn.Module):
                 folder_path=save_path,
                 commit_message="Upload nanoVLM using push_to_hub",
             )
-
-
