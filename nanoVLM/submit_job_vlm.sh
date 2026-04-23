@@ -27,6 +27,7 @@ export HUGGINGFACE_HUB_CACHE=/scratch/$USER/hf_home/hub
 mkdir -p "$HF_HOME" "$HF_DATASETS_CACHE" "$TRANSFORMERS_CACHE" "$HUGGINGFACE_HUB_CACHE"
 
 # W&B
+export WANDB_API_KEY=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
 export WANDB__SERVICE_WAIT=300
 
 # Optional: only if needed
