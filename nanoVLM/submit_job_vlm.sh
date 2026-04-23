@@ -6,7 +6,7 @@
 #SBATCH --partition=l40s
 #SBATCH --gres=gpu:2
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=16
 #SBATCH --mem=80G
 #SBATCH --output=nanoVLM_%j.out
 #SBATCH --error=nanoVLM_%j.err
