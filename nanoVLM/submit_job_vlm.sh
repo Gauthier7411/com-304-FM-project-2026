@@ -7,7 +7,7 @@
 #SBATCH --gres=gpu:2
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=32G
+#SBATCH --mem=80G
 #SBATCH --output=nanoVLM_%j.out
 #SBATCH --error=nanoVLM_%j.err
 
